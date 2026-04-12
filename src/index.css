@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 25% 97%;
+    --foreground: 20 15% 20%;
+
+    --card: 30 20% 95%;
+    --card-foreground: 20 15% 20%;
+
+    --popover: 30 25% 97%;
+    --popover-foreground: 20 15% 20%;
+
+    --primary: 340 30% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 20% 85%;
+    --secondary-foreground: 20 15% 20%;
+
+    --muted: 30 15% 92%;
+    --muted-foreground: 20 10% 50%;
+
+    --accent: 340 25% 90%;
+    --accent-foreground: 20 15% 20%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 340 30% 65%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 30 20% 95%;
+    --sidebar-foreground: 20 15% 20%;
+    --sidebar-primary: 340 30% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 340 25% 90%;
+    --sidebar-accent-foreground: 20 15% 20%;
+    --sidebar-border: 30 15% 88%;
+    --sidebar-ring: 340 30% 65%;
+
+    /* Custom tokens */
+    --cream: 35 30% 95%;
+    --blush: 340 30% 92%;
+    --lavender: 270 25% 90%;
+    --warm-brown: 20 25% 35%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
