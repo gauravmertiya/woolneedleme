@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, Menu, X, Heart, Search } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -7,10 +7,11 @@ import { products } from "@/data/products";
 
 const Navbar = () => {
   const { totalItems } = useCart();
-  const { user, logout } = useAuth(); // ✅ auth added
+  const { user, logout } = useAuth(); // ✅ auth
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -22,12 +23,11 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // 🔍 Search suggestions
-  const filteredSuggestions = products
-    .filter((p) =>
-      p.name.toLowerCase().includes(search.toLowerCase())
-    )
-    .slice(0, 5);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    logout();
+    navigate("/login");
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b">
@@ -38,7 +38,7 @@ const Navbar = () => {
           WoolNeedleMe
         </Link>
 
-        {/* 🔍 Search */}
+        {/* Search Bar */}
         <div className="hidden md:flex flex-1 max-w-md relative">
           <input
             type="text"
@@ -48,28 +48,6 @@ const Navbar = () => {
             className="w-full border rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-
-          {/* Suggestions */}
-          {search && (
-            <div className="absolute top-full left-0 w-full bg-background border mt-2 rounded-lg shadow-lg z-50">
-              {filteredSuggestions.length > 0 ? (
-                filteredSuggestions.map((item) => (
-                  <Link
-                    key={item.id}
-                    to={`/product/${item.id}`}
-                    className="block px-4 py-2 text-sm hover:bg-muted"
-                    onClick={() => setSearch("")}
-                  >
-                    {item.name}
-                  </Link>
-                ))
-              ) : (
-                <p className="px-4 py-2 text-sm text-muted-foreground">
-                  No results found
-                </p>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Desktop Nav */}
@@ -92,12 +70,44 @@ const Navbar = () => {
         {/* Right Side */}
         <div className="flex items-center gap-4">
 
-          {/* ❤️ Wishlist */}
+          {/* 🔐 Auth */}
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="text-sm bg-primary text-primary-foreground px-3 py-1 rounded-lg"
+              >
+                Create Account
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="text-sm text-muted-foreground hidden sm:block">
+                Hi, {user.email}
+              </span>
+
+              <button
+                onClick={handleLogout}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                Logout
+              </button>
+            </>
+          )}
+
+          {/* Wishlist */}
           <Link to="/wishlist" className="text-muted-foreground hover:text-foreground">
             <Heart className="w-5 h-5" />
           </Link>
 
-          {/* 🛒 Cart */}
+          {/* Cart */}
           <Link to="/cart" className="relative text-muted-foreground hover:text-foreground">
             <ShoppingCart className="w-5 h-5" />
             {totalItems > 0 && (
@@ -107,46 +117,32 @@ const Navbar = () => {
             )}
           </Link>
 
-          {/* 👤 Auth Section */}
-          {user ? (
-            <div className="hidden md:flex items-center gap-2 text-sm">
-              <span className="font-medium">{user.name}</span>
-              <button
-                onClick={logout}
-                className="text-muted-foreground hover:underline"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              className="hidden md:block text-sm text-muted-foreground hover:text-foreground"
-            >
-              Login
-            </Link>
-          )}
-
-          {/* Mobile Toggle */}
-          <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
+          {/* Mobile toggle */}
+          <button
+            className="md:hidden"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
             {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
-      {/* 📱 Mobile Menu */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden border-t bg-background">
           <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
 
             {/* Mobile Search */}
-            <input
-              type="text"
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full border rounded-lg px-4 py-2"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full border rounded-lg px-4 py-2 pl-10"
+              />
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+            </div>
 
             {navLinks.map((link) => (
               <Link
@@ -164,29 +160,18 @@ const Navbar = () => {
             ))}
 
             {/* Mobile Auth */}
-            {user ? (
-              <div className="flex flex-col gap-2 text-sm">
-                <span>{user.name}</span>
-                <button
-                  onClick={() => {
-                    logout();
-                    setMenuOpen(false);
-                  }}
-                  className="text-muted-foreground"
-                >
-                  Logout
-                </button>
-              </div>
+            {!user ? (
+              <>
+                <Link to="/login" onClick={() => setMenuOpen(false)}>
+                  Login
+                </Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)}>
+                  Create Account
+                </Link>
+              </>
             ) : (
-              <Link
-                to="/login"
-                className="text-muted-foreground"
-                onClick={() => setMenuOpen(false)}
-              >
-                Login
-              </Link>
+              <button onClick={handleLogout}>Logout</button>
             )}
-
           </div>
         </div>
       )}

@@ -5,12 +5,14 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
 
+
 /* ✅ Fix TypeScript Razorpay error */
 declare global {
   interface Window {
     Razorpay: any;
   }
 }
+
 
 
 const Checkout = () => {
@@ -25,6 +27,12 @@ const Checkout = () => {
     city: "",
     pincode: "",
   });
+
+  useEffect(() => {
+  if (!user) {
+    navigate("/login");
+  }
+}, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -49,28 +57,41 @@ const Checkout = () => {
       name: "WoolNeedleMe",
       description: "Order Payment",
 
-   handler: function (response: any) {
-  const order = {
-    id: Date.now(),
-    items,
-    total: totalPrice,
-    customer: form,
-    paymentId: response.razorpay_payment_id,
-    date: new Date().toISOString(),
-  };
+   handler: async function (response: any) {
+  try {
+    const orderData = {
+      userEmail: user?.email, // 🔐 link order to user
+      items,
+      total: totalPrice,
+      customer: form,
+      paymentId: response.razorpay_payment_id,
+      date: new Date().toISOString(),
+      status: "Paid",
+    };
 
-  // Save order
-  const existing = JSON.parse(localStorage.getItem("orders") || "[]");
-  localStorage.setItem("orders", JSON.stringify([...existing, order]));
+    // ✅ Save to backend (MongoDB)
+    const res = await fetch("http://localhost:5000/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
 
-  toast.success("Order placed successfully 🎉");
+    const savedOrder = await res.json();
 
-  clearCart();
+    toast.success("Order placed successfully 🎉");
 
-  // ✅ IMPORTANT redirect with data
-  navigate("/order-success", { state: { order } });
+    clearCart();
+
+    // ✅ Redirect with DB order
+    navigate("/order-success", { state: { order: savedOrder } });
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Something went wrong while saving order");
+  }
 },
-
       prefill: {
         name: form.name,
         contact: form.phone,

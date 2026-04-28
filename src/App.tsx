@@ -21,6 +21,7 @@ import NotFound from "./pages/NotFound";
 import Orders from "./pages/Orders";
 import OrderSuccess from "./pages/OrderSuccess";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,8 @@ const App = () => (
                 <Route path="/order-success" element={<OrderSuccess />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="*" element={<NotFound />} />
+                <Route path="/register" element={<Register />} />
+
               </Routes>
             </main>
 
