@@ -22,6 +22,9 @@ import Orders from "./pages/Orders";
 import OrderSuccess from "./pages/OrderSuccess";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
 
 const queryClient = new QueryClient();
 
@@ -50,6 +53,8 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="*" element={<NotFound />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
 
               </Routes>
             </main>

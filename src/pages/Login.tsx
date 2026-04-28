@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const Login = () => {
@@ -8,11 +8,12 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // ✅ added
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // 🔒 Email validation
-  const validateEmail = (email: string) => {
+  const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
@@ -30,6 +31,8 @@ const Login = () => {
     }
 
     try {
+      setLoading(true);
+
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
@@ -42,20 +45,23 @@ const Login = () => {
 
       if (!res.ok) {
         setError(data);
+        setLoading(false);
         return;
       }
 
-      // ✅ SAVE TOKEN
+      // ✅ Save token
       localStorage.setItem("token", data.token);
 
-      // ✅ SAVE USER IN CONTEXT
-      login(data.email, "User"); // name optional now
+      // ✅ Save user in context
+      login(data.email, "User");
 
       toast.success("Login successful 🎉");
 
       navigate("/");
     } catch (err) {
       setError("Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,12 +98,23 @@ const Login = () => {
             <p className="text-sm text-red-500">{error}</p>
           )}
 
+          {/* Forgot Password */}
+          <div className="text-right">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-blue-500 hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+
           {/* Button */}
           <button
             onClick={handleLogin}
+            disabled={loading}
             className="w-full bg-primary text-primary-foreground py-2 rounded-lg"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
 
         </div>
